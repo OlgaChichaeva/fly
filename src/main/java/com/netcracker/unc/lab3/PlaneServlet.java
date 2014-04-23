@@ -1,0 +1,155 @@
+/*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package com.netcracker.unc.lab3;
+
+import com.netcracker.unc.lab3.OracleTableFactory;
+import com.netcracker.unc.lab3.TableFactory;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.List;
+import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import com.netcracker.unc.lab3.Plane;
+import com.netcracker.unc.lab3.PlaneDao;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.naming.NamingException;
+
+/**
+ *
+ * @author Ольга
+ */
+@WebServlet(name = "ContrillerServlet", loadOnStartup = 1, urlPatterns = {"/showPlane/", "/PlaneAddServlet/", "/PlaneDeleteServlet/", "/PlaneUpdateServlet/"})
+public class PlaneServlet  extends HttpServlet  {
+
+    
+    private TableFactory factory; 
+    private PlaneDao planeDao;
+
+    @Override
+   public void init() throws ServletException {
+        super.init();
+        try {
+            factory = new OracleTableFactory() ;
+             planeDao = factory.makePlane();
+            System.out.println("asd");
+        } catch (NamingException ex) {
+            ex.printStackTrace();
+            
+        }
+    }
+    
+    /**
+     * Processes requests for both HTTP
+     * <code>GET</code> and
+     * <code>POST</code> methods.
+     *
+     * @param request servlet request
+     * @param response servlet response
+     * @throws ServletException if a servlet-specific error occurs
+     * @throws IOException if an I/O error occurs
+     */
+    
+    protected void processRequest(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        response.setContentType("text/html;charset=UTF-8");
+
+    }
+    // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
+    /**
+     * Handles the HTTP
+     * <code>GET</code> method.
+     *
+     * @param request servlet request
+     * @param response servlet response
+     * @throws ServletException if a servlet-specific error occurs
+     * @throws IOException if an I/O error occurs
+     */
+    @Override
+   
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        String userPath = request.getServletPath();
+        processRequest(request, response);
+        if (userPath.equals("/showPlane/")) {
+            response.setContentType("text/html;charset=UTF-8");
+
+            List<Plane> planes = planeDao.getPlane();
+            
+
+            request.setAttribute("PlaneList", planes);
+            
+
+            PrintWriter out = response.getWriter();
+            //response.sendRedirect(request.getContextPath() + "/showPlane/showPlane.jsp");
+            request.getRequestDispatcher("/showPlane.jsp").forward(request, response);
+        }
+        if (userPath.equals("/PlaneAddServlet/")) {
+            response.setContentType("text/html;charset=UTF-8");
+            Plane plane = new Plane();
+            int id = Integer.parseInt(request.getParameter("id"));
+            int parentId = Integer.parseInt(request.getParameter("parent_id"));
+            String name = request.getParameter("name");
+             String character =request.getParameter("characteristics");
+          
+            plane.setId(id);
+            plane.setName(name);
+            plane.setParent_id(parentId);
+            plane.setCharacter(character);
+            planeDao.insertPlane(plane);
+        }
+        if (userPath.equals("/PlaneDeleteServlet/")) {
+            response.setContentType("text/html;charset=UTF-8");
+            System.out.println(request.getParameter("id"));
+            int id = Integer.parseInt(request.getParameter("id"));
+            planeDao.deletePlane(id);
+        }
+        if (userPath.equals("/PlaneUpdateServlet/")) {
+            response.setContentType("text/html;charset=UTF-8");
+
+            Plane plane = new Plane();
+            int id = Integer.parseInt(request.getParameter("id"));
+            int parentId = Integer.parseInt(request.getParameter("parent_id"));
+            String name = request.getParameter("name");
+            String character = request.getParameter("characteristics");
+           plane.setCharacter(character);
+            plane.setId(id);
+            plane.setName(name);
+           plane.setParent_id(parentId);
+            planeDao.updatePlane(plane);
+
+        }
+    }
+
+    /**
+     * Handles the HTTP
+     * <code>POST</code> method.
+     *
+     * @param request servlet request
+     * @param response servlet response
+     * @throws ServletException if a servlet-specific error occurs
+     * @throws IOException if an I/O error occurs
+     */
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        processRequest(request, response);
+         doGet(request, response);
+
+    }
+
+    /**
+     * Returns a short description of the servlet.
+     *
+     * @return a String containing servlet description
+     */
+    @Override
+    public String getServletInfo() {
+        return "Short description";
+    }// </editor-fold>
+}
